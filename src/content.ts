@@ -1,10 +1,14 @@
 const ROOT = document.documentElement;
+const FOCUS_CARD_ID = "feed-destroyer-focus-card";
+const CONTENT_FOCUS_TARGET_KEY = "focusTarget";
+const DEFAULT_FOCUS_TARGET = "10K MRR for my apps";
 
 type Site = "youtube" | "x" | "other";
 type YouTubeView = "home" | "watch" | "shorts" | "search" | "subscriptions" | "channel" | "other";
 type XFeed = "for-you" | "following" | "other";
 
 let pendingRefresh = false;
+let focusTarget = DEFAULT_FOCUS_TARGET;
 
 function getSite(): Site {
   const host = window.location.hostname.replace(/^www\./, "");
@@ -73,6 +77,8 @@ function refreshState(): void {
     delete ROOT.dataset.focusAppYoutubeView;
     delete ROOT.dataset.focusAppXFeed;
   }
+
+  renderFocusCard();
 }
 
 function scheduleRefresh(): void {
@@ -117,6 +123,129 @@ function startObserver(): void {
   });
 }
 
+function shouldShowFocusCard(): boolean {
+  if (getSite() === "youtube") {
+    return getYouTubeView() === "home" || getYouTubeView() === "shorts";
+  }
+
+  return getSite() === "x" && getXFeed() === "for-you";
+}
+
+function getFocusCardMount(): Element | null {
+  if (getSite() === "youtube") {
+    if (getYouTubeView() === "shorts") {
+      return document.querySelector("ytd-app");
+    }
+
+    return (
+      document.querySelector('ytd-browse[page-subtype="home"] #primary') ??
+      document.querySelector('ytd-browse[page-subtype="home"]') ??
+      document.querySelector("ytd-app")
+    );
+  }
+
+  if (getSite() === "x") {
+    return (
+      document.querySelector('main [aria-label="Home timeline"]') ??
+      document.querySelector('main [aria-label="Timeline: Your Home Timeline"]') ??
+      document.querySelector("main")
+    );
+  }
+
+  return null;
+}
+
+function getOrCreateFocusCard(): HTMLElement {
+  const existing = document.getElementById(FOCUS_CARD_ID);
+  if (existing) return existing;
+
+  const card = document.createElement("section");
+  card.id = FOCUS_CARD_ID;
+  card.setAttribute("aria-live", "polite");
+
+  const header = document.createElement("div");
+  header.className = "feed-destroyer-focus-header";
+
+  const icon = document.createElement("img");
+  icon.className = "feed-destroyer-focus-icon";
+  icon.src = chrome.runtime.getURL("dist/icons/icon-48.png");
+  icon.alt = "";
+  icon.width = 48;
+  icon.height = 48;
+
+  const copy = document.createElement("div");
+  copy.className = "feed-destroyer-focus-copy";
+
+  const eyebrow = document.createElement("p");
+  eyebrow.className = "feed-destroyer-focus-eyebrow";
+  eyebrow.textContent = "Feed destroyed";
+
+  const title = document.createElement("h2");
+  title.className = "feed-destroyer-focus-title";
+  title.textContent = "Hey, remember what today is for.";
+
+  const message = document.createElement("p");
+  message.className = "feed-destroyer-focus-message";
+
+  const target = document.createElement("strong");
+  target.className = "feed-destroyer-focus-target";
+
+  const footer = document.createElement("p");
+  footer.className = "feed-destroyer-focus-footer";
+  footer.textContent = "The feed can wait. Go make the number move.";
+
+  message.append("You told me you are focusing on ");
+  message.append(target);
+  message.append(".");
+
+  copy.append(eyebrow, title);
+  header.append(icon, copy);
+  card.append(header, message, footer);
+  return card;
+}
+
+function renderFocusCard(): void {
+  const existing = document.getElementById(FOCUS_CARD_ID);
+
+  if (!shouldShowFocusCard()) {
+    existing?.remove();
+    return;
+  }
+
+  const mount = getFocusCardMount();
+  if (!mount) return;
+
+  const card = getOrCreateFocusCard();
+  const target = card.querySelector<HTMLElement>(".feed-destroyer-focus-target");
+  if (target) {
+    target.textContent = focusTarget || DEFAULT_FOCUS_TARGET;
+  }
+
+  if (card.parentElement !== mount) {
+    mount.prepend(card);
+  }
+}
+
+async function loadFocusTarget(): Promise<void> {
+  const values = await chrome.storage.local.get({
+    [CONTENT_FOCUS_TARGET_KEY]: DEFAULT_FOCUS_TARGET
+  });
+
+  focusTarget = values[CONTENT_FOCUS_TARGET_KEY] || DEFAULT_FOCUS_TARGET;
+  scheduleRefresh();
+}
+
+function listenForFocusTargetChanges(): void {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "local" || !changes[CONTENT_FOCUS_TARGET_KEY]) return;
+
+    focusTarget = changes[CONTENT_FOCUS_TARGET_KEY].newValue || DEFAULT_FOCUS_TARGET;
+    scheduleRefresh();
+  });
+}
+
 refreshState();
+void loadFocusTarget();
+listenForFocusTargetChanges();
 listenForRouteChanges();
 startObserver();

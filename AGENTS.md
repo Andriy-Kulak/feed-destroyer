@@ -17,14 +17,14 @@ Feed Destroyer is a small privacy-preserving Chrome extension for removing distr
 - Prefer robust CSS selectors and small DOM state detection over brittle click automation.
 - Use MutationObserver only for lightweight state refreshes on SPA navigation or tab changes.
 - Keep build output in `dist/`; do not hand-edit generated files.
-- Keep the popup informational only unless the user explicitly asks for controls.
+- Keep the popup focused on the local focus-target input unless the user explicitly asks for more controls.
 - The selected icon source is `src/icons/icon-source.png`; regenerate `icon-16.png`, `icon-32.png`, `icon-48.png`, and `icon-128.png` from that source.
 
 ## Current Behavior
 
 - YouTube: hide feeds, recommendations, Shorts surfaces, comments, live chat, mixes, end-screen cards, and related distraction panels while preserving direct video playback, search, subscriptions, and channels.
 - X: keep the `For you` tab visible, hide only the Home timeline contents when `For you` is active, and leave `Following` usable.
-- Popup: no toggles, no settings, just the extension name and one or two sentences describing the behavior.
+- Popup: no toggles; store a local focus target with `chrome.storage.local` and render it in the blocked feed area.
 
 ## Verification
 

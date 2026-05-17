@@ -43,3 +43,134 @@ html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"] main [aria-label=
 html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"] main [aria-label="Timeline: Your Home Timeline"] [data-testid="cellInnerDiv"]:has(article) {
   display: none !important;
 }
+
+#feed-destroyer-focus-card {
+  box-sizing: border-box !important;
+  display: block !important;
+  width: calc(100% - 48px) !important;
+  max-width: 760px !important;
+  margin: 32px auto !important;
+  padding: 28px !important;
+  color: #17181c !important;
+  background: #fff8ee !important;
+  border: 0 !important;
+  border-radius: 22px !important;
+  box-shadow:
+    inset 0 0 0 3px #17181c,
+    8px 8px 0 #ffd23f !important;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  text-align: left !important;
+}
+
+html[data-focus-app-site="youtube"] #feed-destroyer-focus-card {
+  width: min(720px, calc(100% - 72px)) !important;
+  max-width: calc(100% - 72px) !important;
+  margin: 72px auto 72px !important;
+  box-shadow:
+    inset 0 0 0 3px #17181c,
+    6px 6px 0 #ffd23f !important;
+}
+
+.feed-destroyer-focus-header,
+.feed-destroyer-focus-copy,
+.feed-destroyer-focus-title,
+.feed-destroyer-focus-message,
+.feed-destroyer-focus-footer {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: inherit !important;
+  font-family: inherit !important;
+  letter-spacing: 0 !important;
+}
+
+.feed-destroyer-focus-header {
+  display: grid !important;
+  grid-template-columns: 56px 1fr !important;
+  gap: 14px !important;
+  align-items: center !important;
+}
+
+.feed-destroyer-focus-icon {
+  display: block !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 18px rgba(23, 24, 28, 0.16) !important;
+}
+
+.feed-destroyer-focus-copy {
+  min-width: 0 !important;
+}
+
+.feed-destroyer-focus-eyebrow {
+  color: #ff4d2d !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase !important;
+}
+
+.feed-destroyer-focus-title {
+  margin-top: 8px !important;
+  font-size: 30px !important;
+  font-weight: 900 !important;
+  line-height: 1.08 !important;
+}
+
+.feed-destroyer-focus-message {
+  margin-top: 14px !important;
+  color: #2f333b !important;
+  font-size: 20px !important;
+  font-weight: 650 !important;
+  line-height: 1.35 !important;
+}
+
+.feed-destroyer-focus-target {
+  color: #17181c !important;
+  font-weight: 950 !important;
+  background: linear-gradient(transparent 58%, #ffd23f 58%) !important;
+}
+
+.feed-destroyer-focus-footer {
+  margin-top: 14px !important;
+  color: #686d76 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card {
+  width: calc(100% - 32px) !important;
+  max-width: calc(100% - 32px) !important;
+  margin: 18px auto !important;
+}
+
+@media (max-width: 700px) {
+  #feed-destroyer-focus-card {
+    margin: 18px 14px !important;
+    padding: 20px !important;
+    border-radius: 18px !important;
+    box-shadow:
+      inset 0 0 0 3px #17181c,
+      5px 5px 0 #ffd23f !important;
+  }
+
+  .feed-destroyer-focus-header {
+    grid-template-columns: 44px 1fr !important;
+    gap: 12px !important;
+  }
+
+  .feed-destroyer-focus-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 11px !important;
+  }
+
+  .feed-destroyer-focus-title {
+    font-size: 24px !important;
+  }
+
+  .feed-destroyer-focus-message {
+    font-size: 17px !important;
+  }
+}

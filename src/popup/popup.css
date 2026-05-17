@@ -8,7 +8,7 @@
 }
 
 body {
-  width: 320px;
+  width: 360px;
   margin: 0;
   color: #17181c;
   background: #fff8ee;
@@ -52,4 +52,42 @@ h1 {
   color: #2f333b;
   font-size: 15px;
   line-height: 1.45;
+}
+
+.focus-label {
+  display: block;
+  margin-top: 18px;
+  color: #686d76;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.focus-input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  margin-top: 8px;
+  padding: 0 12px;
+  color: #17181c;
+  background: #ffffff;
+  border: 2px solid #17181c;
+  border-radius: 10px;
+  outline: none;
+  font: inherit;
+  font-size: 15px;
+  box-shadow: 4px 4px 0 #ffd23f;
+}
+
+.focus-input:focus {
+  border-color: #ff4d2d;
+  box-shadow: 4px 4px 0 #17181c;
+}
+
+.hint {
+  margin: 12px 0 0;
+  color: #686d76;
+  font-size: 13px;
+  line-height: 1.35;
 }
