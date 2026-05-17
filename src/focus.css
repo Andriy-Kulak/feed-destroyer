@@ -1,0 +1,45 @@
+:root.focus-app-youtube {
+  --focus-app-hide-display: none !important;
+}
+
+html[data-focus-app-youtube-view="home"] ytd-browse[page-subtype="home"] ytd-rich-grid-renderer,
+html[data-focus-app-youtube-view="home"] ytd-browse[page-subtype="home"] #contents,
+html[data-focus-app-youtube-view="shorts"] ytd-reel-video-renderer,
+html[data-focus-app-youtube-view="shorts"] ytd-shorts,
+ytd-browse[page-subtype="home"] ytd-rich-section-renderer,
+ytd-reel-shelf-renderer,
+ytd-rich-shelf-renderer[is-shorts],
+ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+ytd-video-renderer:has(a[href^="/shorts/"]),
+ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+ytd-guide-entry-renderer:has(a[href^="/shorts"]),
+ytd-mini-guide-entry-renderer:has(a[href^="/shorts"]),
+a[title="Shorts"],
+ytd-comments,
+#comments,
+ytd-comment-thread-renderer,
+ytd-watch-next-secondary-results-renderer,
+ytd-compact-video-renderer,
+ytd-compact-radio-renderer,
+ytd-radio-renderer,
+ytd-live-chat-frame,
+yt-live-chat-app,
+ytd-playlist-panel-renderer,
+ytd-merch-shelf-renderer,
+ytd-donation-shelf-renderer,
+ytd-fundraiser-renderer,
+.ytp-endscreen-content,
+.ytp-ce-element,
+.ytp-cards-teaser,
+.ytp-cards-button {
+  display: var(--focus-app-hide-display);
+}
+
+html[data-focus-app-youtube-view="watch"] #secondary {
+  display: none !important;
+}
+
+html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"] main [aria-label="Home timeline"] [data-testid="cellInnerDiv"]:has(article),
+html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"] main [aria-label="Timeline: Your Home Timeline"] [data-testid="cellInnerDiv"]:has(article) {
+  display: none !important;
+}
