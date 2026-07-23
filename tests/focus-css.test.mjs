@@ -7,8 +7,9 @@ const focusCss = await readFile(new URL("../src/focus.css", import.meta.url), "u
 function getHiddenSelectors(css) {
   const selectors = [];
   const rulePattern = /([^{}]+)\{([^{}]+)\}/g;
+  const cssWithoutComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
-  for (const match of css.matchAll(rulePattern)) {
+  for (const match of cssWithoutComments.matchAll(rulePattern)) {
     const [, selectorList, declarations] = match;
     const hidesElement =
       /display\s*:\s*none\s*!important/.test(declarations) ||
@@ -30,6 +31,10 @@ function getHiddenSelectors(css) {
 test("YouTube watch rules hide recommendations without hiding engagement panels", () => {
   const hiddenSelectors = getHiddenSelectors(focusCss);
 
+  assert.ok(
+    hiddenSelectors.includes('html[data-focus-app-youtube-view="watch"] #related'),
+    "the current watch-page recommendations container should be hidden"
+  );
   assert.ok(
     hiddenSelectors.includes("ytd-watch-next-secondary-results-renderer"),
     "the watch-next recommendation renderer should stay hidden"

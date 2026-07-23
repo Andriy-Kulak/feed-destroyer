@@ -36,6 +36,9 @@ ytd-fundraiser-renderer,
 }
 
 /* Keep #secondary visible: YouTube mounts useful engagement panels such as Gemini Ask inside it. */
+html[data-focus-app-youtube-view="watch"] #related {
+  display: none !important;
+}
 
 html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"] main [aria-label="Home timeline"] [data-testid="cellInnerDiv"]:has(article),
 html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"] main [aria-label="Timeline: Your Home Timeline"] [data-testid="cellInnerDiv"]:has(article) {
