@@ -8,7 +8,7 @@ A tiny always-on Chrome extension that hides distracting surfaces on YouTube and
 
 ## What it does
 
-- YouTube: hides home/browse feeds, recommendations, Shorts entry points, comments, live chat, end-screen cards, mixes, and merch/fundraiser-style panels while keeping direct video watching, search, subscriptions, and channels usable.
+- YouTube: hides home/browse feeds, recommendations, Shorts navigation entry points, comments, live chat, end-screen cards, mixes, and merch/fundraiser-style panels while keeping direct video and Shorts watching, search, subscriptions, and channel Shorts tabs usable.
 - X: keeps the `For you` tab visible, but hides the Home timeline contents when `For you` is active. `Following` remains usable.
 - Popup: lets you set a local focus target, then shows that reminder where the blocked feed used to be.
 

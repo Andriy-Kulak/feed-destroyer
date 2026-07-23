@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const focusCss = await readFile(new URL("../src/focus.css", import.meta.url), "utf8");
+const contentScript = await readFile(new URL("../src/content.ts", import.meta.url), "utf8");
 
 function getHiddenSelectors(css) {
   const selectors = [];
@@ -49,5 +50,36 @@ test("YouTube watch rules hide recommendations without hiding engagement panels"
     ),
     false,
     "the entire secondary column must remain visible because YouTube mounts Gemini Ask panels inside it"
+  );
+});
+
+test("explicit Shorts pages and channel tabs remain usable", () => {
+  const hiddenSelectors = getHiddenSelectors(focusCss);
+  const explicitShortsContentSelectors = [
+    'html[data-focus-app-youtube-view="shorts"] ytd-reel-video-renderer',
+    'html[data-focus-app-youtube-view="shorts"] ytd-shorts',
+    "ytd-reel-shelf-renderer",
+    "ytd-rich-shelf-renderer[is-shorts]",
+    'ytd-rich-item-renderer:has(a[href^="/shorts/"])',
+    'ytd-video-renderer:has(a[href^="/shorts/"])',
+    'ytd-grid-video-renderer:has(a[href^="/shorts/"])'
+  ];
+
+  for (const selector of explicitShortsContentSelectors) {
+    assert.equal(
+      hiddenSelectors.includes(selector),
+      false,
+      `${selector} should remain visible for intentional Shorts viewing`
+    );
+  }
+
+  assert.ok(
+    hiddenSelectors.includes('ytd-guide-entry-renderer:has(a[href^="/shorts"])'),
+    "the distracting Shorts sidebar entry should stay hidden"
+  );
+  assert.doesNotMatch(
+    contentScript,
+    /getYouTubeView\(\) === "home" \|\| getYouTubeView\(\) === "shorts"/,
+    "direct Shorts routes should not mount the feed-destroyed focus card"
   );
 });
