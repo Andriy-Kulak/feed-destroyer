@@ -125,7 +125,7 @@ function startObserver(): void {
 
 function shouldShowFocusCard(): boolean {
   if (getSite() === "youtube") {
-    return getYouTubeView() === "home" || getYouTubeView() === "shorts";
+    return getYouTubeView() === "home";
   }
 
   return getSite() === "x" && getXFeed() === "for-you";
@@ -133,10 +133,6 @@ function shouldShowFocusCard(): boolean {
 
 function getFocusCardMount(): Element | null {
   if (getSite() === "youtube") {
-    if (getYouTubeView() === "shorts") {
-      return document.querySelector("ytd-app");
-    }
-
     return (
       document.querySelector('ytd-browse[page-subtype="home"] #primary') ??
       document.querySelector('ytd-browse[page-subtype="home"]') ??

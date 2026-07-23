@@ -22,7 +22,7 @@ Feed Destroyer is a small privacy-preserving Chrome extension for removing distr
 
 ## Current Behavior
 
-- YouTube: hide feeds, recommendations, Shorts surfaces, comments, live chat, mixes, end-screen cards, and related distraction panels while preserving direct video playback, search, subscriptions, and channels.
+- YouTube: hide feeds, recommendations, Shorts navigation entry points, comments, live chat, mixes, end-screen cards, and related distraction panels while preserving direct video and Shorts playback, search, subscriptions, and channel Shorts tabs.
 - X: keep the `For you` tab visible, hide only the Home timeline contents when `For you` is active, and leave `Following` usable.
 - Popup: no toggles; store a local focus target with `chrome.storage.local` and render it in the blocked feed area.
 

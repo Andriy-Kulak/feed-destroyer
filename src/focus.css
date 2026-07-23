@@ -4,14 +4,7 @@
 
 html[data-focus-app-youtube-view="home"] ytd-browse[page-subtype="home"] ytd-rich-grid-renderer,
 html[data-focus-app-youtube-view="home"] ytd-browse[page-subtype="home"] #contents,
-html[data-focus-app-youtube-view="shorts"] ytd-reel-video-renderer,
-html[data-focus-app-youtube-view="shorts"] ytd-shorts,
 ytd-browse[page-subtype="home"] ytd-rich-section-renderer,
-ytd-reel-shelf-renderer,
-ytd-rich-shelf-renderer[is-shorts],
-ytd-rich-item-renderer:has(a[href^="/shorts/"]),
-ytd-video-renderer:has(a[href^="/shorts/"]),
-ytd-grid-video-renderer:has(a[href^="/shorts/"]),
 ytd-guide-entry-renderer:has(a[href^="/shorts"]),
 ytd-mini-guide-entry-renderer:has(a[href^="/shorts"]),
 a[title="Shorts"],
@@ -35,7 +28,8 @@ ytd-fundraiser-renderer,
   display: var(--focus-app-hide-display);
 }
 
-html[data-focus-app-youtube-view="watch"] #secondary {
+/* Keep #secondary visible: YouTube mounts useful engagement panels such as Gemini Ask inside it. */
+html[data-focus-app-youtube-view="watch"] #related {
   display: none !important;
 }
 
