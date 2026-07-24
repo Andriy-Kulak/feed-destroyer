@@ -23,8 +23,16 @@ Feed Destroyer is a small privacy-preserving Chrome extension for removing distr
 ## Current Behavior
 
 - YouTube: hide feeds, recommendations, Shorts navigation entry points, comments, live chat, mixes, end-screen cards, and related distraction panels while preserving direct video and Shorts playback, search, subscriptions, and channel Shorts tabs.
-- X: keep the `For you` tab visible, hide only the Home timeline contents when `For you` is active, and leave `Following` usable.
-- Popup: no toggles; store a local focus target with `chrome.storage.local` and render it in the blocked feed area.
+- X: hide the Home timeline contents when `For you` is active by default, keep the hide/show switch visible in a compact control bar when the feed is shown, and leave `Following` usable.
+- Popup: store the local focus target and X `For you` visibility preference with `chrome.storage.local`.
+
+## Pull Request Heartbeat
+
+- When a pull request has a Cursor Bugbot check, automatically start a review heartbeat after every push.
+- Keep monitoring the exact latest head commit until CI and Cursor Bugbot both reach terminal states. Do not treat a pending Bugbot check as approval.
+- After Bugbot finishes, perform a thread-aware review scan. Fix every actionable finding, add regression coverage, push the fixes, reply with the fix commit and validation, resolve addressed threads, and restart the heartbeat for the new head commit.
+- Do not report the pull request as fully approved while checks are pending or failing, actionable findings remain, or review threads are unresolved.
+- The heartbeat is complete only when the latest head commit is mergeable, CI passes, Cursor Bugbot passes, and the thread-aware scan reports zero unresolved review threads.
 
 ## Verification
 
@@ -34,4 +42,4 @@ Run:
 npm run check
 ```
 
-Then load the project folder through `chrome://extensions` and manually verify YouTube and X behavior in Chrome.
+This runs static contracts and headless browser tests against the built extension. Also load the project folder through `chrome://extensions` for a quick live-site smoke test when selectors or visible behavior change.
