@@ -33,8 +33,8 @@ html[data-focus-app-youtube-view="watch"] #related {
   display: none !important;
 }
 
-html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"] main [aria-label="Home timeline"] [data-testid="cellInnerDiv"]:has(article),
-html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"] main [aria-label="Timeline: Your Home Timeline"] [data-testid="cellInnerDiv"]:has(article) {
+html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"][data-focus-app-hide-x-for-you="true"] main [aria-label="Home timeline"] [data-testid="cellInnerDiv"]:has(article),
+html[data-focus-app-site="x"][data-focus-app-x-feed="for-you"][data-focus-app-hide-x-for-you="true"] main [aria-label="Timeline: Your Home Timeline"] [data-testid="cellInnerDiv"]:has(article) {
   display: none !important;
 }
 
@@ -136,7 +136,151 @@ html[data-focus-app-site="youtube"] #feed-destroyer-focus-card {
 html[data-focus-app-site="x"] #feed-destroyer-focus-card {
   width: calc(100% - 32px) !important;
   max-width: calc(100% - 32px) !important;
-  margin: 18px auto !important;
+  margin: 12px auto !important;
+  padding: 18px 20px !important;
+  border-radius: 16px !important;
+  box-shadow:
+    inset 0 0 0 2px #17181c,
+    5px 5px 0 #ffd23f !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card .feed-destroyer-focus-header {
+  grid-template-columns: 40px 1fr !important;
+  gap: 12px !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card .feed-destroyer-focus-icon {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 5px 12px rgba(23, 24, 28, 0.14) !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card .feed-destroyer-focus-eyebrow {
+  font-size: 11px !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card .feed-destroyer-focus-title {
+  margin-top: 3px !important;
+  font-size: 22px !important;
+  line-height: 1.1 !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card .feed-destroyer-focus-message {
+  margin-top: 10px !important;
+  font-size: 16px !important;
+  line-height: 1.3 !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card .feed-destroyer-focus-footer {
+  margin-top: 10px !important;
+  font-size: 12px !important;
+}
+
+.feed-destroyer-card-setting {
+  box-sizing: border-box !important;
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin: 12px 0 0 !important;
+  padding: 10px 12px !important;
+  color: #17181c !important;
+  background: #ffffff !important;
+  border: 2px solid #17181c !important;
+  border-radius: 11px !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+}
+
+.feed-destroyer-card-setting-copy {
+  display: block !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.feed-destroyer-card-setting-label,
+.feed-destroyer-card-setting-hint {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+.feed-destroyer-card-setting-label {
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+}
+
+.feed-destroyer-card-setting-hint {
+  margin-top: 2px !important;
+  color: #686d76 !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  line-height: 1.2 !important;
+}
+
+.feed-destroyer-card-toggle {
+  position: relative !important;
+  flex: 0 0 auto !important;
+  box-sizing: border-box !important;
+  width: 42px !important;
+  height: 24px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  appearance: none !important;
+  background: #c8cbd1 !important;
+  border: 2px solid #17181c !important;
+  border-radius: 999px !important;
+  cursor: pointer !important;
+}
+
+.feed-destroyer-card-toggle::after {
+  position: absolute !important;
+  top: 3px !important;
+  left: 3px !important;
+  box-sizing: border-box !important;
+  width: 14px !important;
+  height: 14px !important;
+  background: #ffffff !important;
+  border: 2px solid #17181c !important;
+  border-radius: 50% !important;
+  content: "" !important;
+  transition: transform 120ms ease !important;
+}
+
+.feed-destroyer-card-toggle:checked {
+  background: #ff4d2d !important;
+}
+
+.feed-destroyer-card-toggle:checked::after {
+  transform: translateX(18px) !important;
+}
+
+.feed-destroyer-card-toggle:focus-visible {
+  outline: 3px solid #ffd23f !important;
+  outline-offset: 2px !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] {
+  margin: 8px auto !important;
+  padding: 0 !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] .feed-destroyer-focus-header,
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] .feed-destroyer-focus-message,
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] .feed-destroyer-focus-footer {
+  display: none !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] .feed-destroyer-card-setting {
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  background: transparent !important;
+  border: 0 !important;
 }
 
 @media (max-width: 700px) {

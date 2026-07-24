@@ -1,7 +1,9 @@
 const ROOT = document.documentElement;
 const FOCUS_CARD_ID = "feed-destroyer-focus-card";
 const CONTENT_FOCUS_TARGET_KEY = "focusTarget";
+const CONTENT_HIDE_X_FOR_YOU_KEY = "hideXForYou";
 const DEFAULT_FOCUS_TARGET = "10K MRR for my apps";
+const DEFAULT_HIDE_X_FOR_YOU = true;
 
 type Site = "youtube" | "x" | "other";
 type YouTubeView = "home" | "watch" | "shorts" | "search" | "subscriptions" | "channel" | "other";
@@ -9,6 +11,7 @@ type XFeed = "for-you" | "following" | "other";
 
 let pendingRefresh = false;
 let focusTarget = DEFAULT_FOCUS_TARGET;
+let hideXForYou = DEFAULT_HIDE_X_FOR_YOU;
 
 function getSite(): Site {
   const host = window.location.hostname.replace(/^www\./, "");
@@ -70,12 +73,15 @@ function refreshState(): void {
   if (site === "youtube") {
     ROOT.dataset.focusAppYoutubeView = getYouTubeView();
     delete ROOT.dataset.focusAppXFeed;
+    delete ROOT.dataset.focusAppHideXForYou;
   } else if (site === "x") {
     ROOT.dataset.focusAppXFeed = getXFeed();
+    ROOT.dataset.focusAppHideXForYou = String(hideXForYou);
     delete ROOT.dataset.focusAppYoutubeView;
   } else {
     delete ROOT.dataset.focusAppYoutubeView;
     delete ROOT.dataset.focusAppXFeed;
+    delete ROOT.dataset.focusAppHideXForYou;
   }
 
   renderFocusCard();
@@ -196,7 +202,44 @@ function getOrCreateFocusCard(): HTMLElement {
 
   copy.append(eyebrow, title);
   header.append(icon, copy);
-  card.append(header, message, footer);
+  card.append(header, message);
+
+  if (getSite() === "x") {
+    const setting = document.createElement("label");
+    setting.className = "feed-destroyer-card-setting";
+
+    const settingCopy = document.createElement("span");
+    settingCopy.className = "feed-destroyer-card-setting-copy";
+
+    const settingLabel = document.createElement("strong");
+    settingLabel.className = "feed-destroyer-card-setting-label";
+    settingLabel.textContent = 'Hide X "For you" feed';
+
+    const settingHint = document.createElement("span");
+    settingHint.className = "feed-destroyer-card-setting-hint";
+    settingHint.textContent = "Turn off to browse";
+
+    const settingSwitch = document.createElement("input");
+    settingSwitch.className = "feed-destroyer-card-toggle";
+    settingSwitch.type = "checkbox";
+    settingSwitch.checked = hideXForYou;
+    settingSwitch.setAttribute("role", "switch");
+    settingSwitch.setAttribute("aria-label", 'Hide X "For you" feed');
+    settingSwitch.addEventListener("change", () => {
+      hideXForYou = settingSwitch.checked;
+      scheduleRefresh();
+
+      void chrome.storage.local.set({
+        [CONTENT_HIDE_X_FOR_YOU_KEY]: hideXForYou
+      });
+    });
+
+    settingCopy.append(settingLabel, settingHint);
+    setting.append(settingCopy, settingSwitch);
+    card.append(setting);
+  }
+
+  card.append(footer);
   return card;
 }
 
@@ -217,31 +260,71 @@ function renderFocusCard(): void {
     target.textContent = focusTarget || DEFAULT_FOCUS_TARGET;
   }
 
+  if (getSite() === "x") {
+    card.dataset.xFeedHidden = String(hideXForYou);
+
+    const settingSwitch = card.querySelector<HTMLInputElement>(
+      ".feed-destroyer-card-toggle"
+    );
+    if (settingSwitch) {
+      settingSwitch.checked = hideXForYou;
+    }
+
+    const settingHint = card.querySelector<HTMLElement>(
+      ".feed-destroyer-card-setting-hint"
+    );
+    if (settingHint) {
+      settingHint.textContent = hideXForYou ? "Turn off to browse" : "Turn on to hide";
+    }
+  }
+
   if (card.parentElement !== mount) {
     mount.prepend(card);
   }
 }
 
-async function loadFocusTarget(): Promise<void> {
+async function loadPreferences(): Promise<void> {
   const values = await chrome.storage.local.get({
-    [CONTENT_FOCUS_TARGET_KEY]: DEFAULT_FOCUS_TARGET
+    [CONTENT_FOCUS_TARGET_KEY]: DEFAULT_FOCUS_TARGET,
+    [CONTENT_HIDE_X_FOR_YOU_KEY]: DEFAULT_HIDE_X_FOR_YOU
   });
 
-  focusTarget = values[CONTENT_FOCUS_TARGET_KEY] || DEFAULT_FOCUS_TARGET;
-  scheduleRefresh();
+  const storedFocusTarget = values[CONTENT_FOCUS_TARGET_KEY];
+  focusTarget =
+    typeof storedFocusTarget === "string" && storedFocusTarget
+      ? storedFocusTarget
+      : DEFAULT_FOCUS_TARGET;
+  hideXForYou = values[CONTENT_HIDE_X_FOR_YOU_KEY] !== false;
 }
 
-function listenForFocusTargetChanges(): void {
+function listenForPreferenceChanges(): void {
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== "local" || !changes[CONTENT_FOCUS_TARGET_KEY]) return;
+    if (areaName !== "local") return;
 
-    focusTarget = changes[CONTENT_FOCUS_TARGET_KEY].newValue || DEFAULT_FOCUS_TARGET;
-    scheduleRefresh();
+    if (changes[CONTENT_FOCUS_TARGET_KEY]) {
+      const nextFocusTarget = changes[CONTENT_FOCUS_TARGET_KEY].newValue;
+      focusTarget =
+        typeof nextFocusTarget === "string" && nextFocusTarget
+          ? nextFocusTarget
+          : DEFAULT_FOCUS_TARGET;
+    }
+
+    if (changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
+      hideXForYou = changes[CONTENT_HIDE_X_FOR_YOU_KEY].newValue !== false;
+    }
+
+    if (changes[CONTENT_FOCUS_TARGET_KEY] || changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
+      scheduleRefresh();
+    }
   });
 }
 
-refreshState();
-void loadFocusTarget();
-listenForFocusTargetChanges();
-listenForRouteChanges();
-startObserver();
+async function initialize(): Promise<void> {
+  await loadPreferences();
+  refreshState();
+  listenForPreferenceChanges();
+  listenForRouteChanges();
+  startObserver();
+}
+
+void initialize();
