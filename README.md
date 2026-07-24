@@ -46,7 +46,9 @@ Click the Feed Destroyer toolbar icon to set what you are focusing on today.
 
 Use **Hide X "For you" feed** to change X at any time. Switching it off restores
 the feed immediately; switching it on hides the feed and restores the focus card.
-The setting is saved locally in Chrome.
+The same switch appears inside X's focus card for quickly restoring the feed. Once
+the card is gone, use the popup to turn hiding back on. The setting is saved locally
+in Chrome.
 
 Example:
 
@@ -82,7 +84,7 @@ Current browser coverage includes:
 - Watch recommendations hidden while Gemini and Viewstats remain visible.
 - Direct Shorts and channel Shorts preserved while Shorts navigation stays hidden.
 - Search, subscriptions, and channel pages preserved.
-- X `For you` hidden by default, switchable from the popup, and `Following` preserved.
+- X `For you` hidden by default, switchable from the focus card or popup, and `Following` preserved.
 
 Run one behavior while developing:
 

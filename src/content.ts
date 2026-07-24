@@ -202,7 +202,41 @@ function getOrCreateFocusCard(): HTMLElement {
 
   copy.append(eyebrow, title);
   header.append(icon, copy);
-  card.append(header, message, footer);
+  card.append(header, message);
+
+  if (getSite() === "x") {
+    const setting = document.createElement("label");
+    setting.className = "feed-destroyer-card-setting";
+
+    const settingCopy = document.createElement("span");
+    settingCopy.className = "feed-destroyer-card-setting-copy";
+
+    const settingLabel = document.createElement("strong");
+    settingLabel.className = "feed-destroyer-card-setting-label";
+    settingLabel.textContent = 'Hide X "For you" feed';
+
+    const settingHint = document.createElement("span");
+    settingHint.className = "feed-destroyer-card-setting-hint";
+    settingHint.textContent = "Turn off to browse";
+
+    const settingSwitch = document.createElement("input");
+    settingSwitch.className = "feed-destroyer-card-toggle";
+    settingSwitch.type = "checkbox";
+    settingSwitch.checked = hideXForYou;
+    settingSwitch.setAttribute("role", "switch");
+    settingSwitch.setAttribute("aria-label", 'Hide X "For you" feed');
+    settingSwitch.addEventListener("change", () => {
+      void chrome.storage.local.set({
+        [CONTENT_HIDE_X_FOR_YOU_KEY]: settingSwitch.checked
+      });
+    });
+
+    settingCopy.append(settingLabel, settingHint);
+    setting.append(settingCopy, settingSwitch);
+    card.append(setting);
+  }
+
+  card.append(footer);
   return card;
 }
 

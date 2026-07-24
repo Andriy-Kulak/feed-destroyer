@@ -192,6 +192,23 @@ test("replaces the X For you timeline with the focus card", async ({ context }) 
   await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
 });
 
+test("can show the X For you timeline from the focus card", async ({ context }) => {
+  const page = await openFixturePage(
+    context,
+    "https://x.com/home",
+    xTimelineFixture("For you")
+  );
+  const focusCard = page.locator("#feed-destroyer-focus-card");
+  const hideForYouSwitch = focusCard.getByRole("switch", {
+    name: 'Hide X "For you" feed'
+  });
+
+  await expect(hideForYouSwitch).toBeChecked();
+  await hideForYouSwitch.uncheck();
+  await expect(page.getByTestId("timeline-post")).toBeVisible();
+  await expect(focusCard).toHaveCount(0);
+});
+
 test("can show and hide the X For you timeline from the popup", async ({ context }) => {
   const page = await openFixturePage(
     context,
