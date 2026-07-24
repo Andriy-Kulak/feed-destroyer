@@ -112,6 +112,26 @@ function xTimelineFixture(selectedTab: "For you" | "Following"): string {
 </html>`;
 }
 
+function xTimelineHydrationFixture(): string {
+  return xTimelineFixture("For you").replace(
+    "<body>",
+    `<body>
+    <script>
+      window.xHideStateTransitions = [];
+      const recordXHideState = () => {
+        window.xHideStateTransitions.push(
+          document.documentElement.getAttribute("data-focus-app-hide-x-for-you")
+        );
+      };
+      recordXHideState();
+      new MutationObserver(recordXHideState).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-focus-app-hide-x-for-you"]
+      });
+    </script>`
+  );
+}
+
 test("replaces the YouTube home feed with the focus card", async ({ context }) => {
   const page = await openFixturePage(context, "https://www.youtube.com/", youtubeHomeFixture);
 
@@ -190,6 +210,44 @@ test("replaces the X For you timeline with the focus card", async ({ context }) 
   await expect(page.locator("html")).toHaveAttribute("data-focus-app-x-feed", "for-you");
   await expect(page.getByTestId("timeline-post")).toBeHidden();
   await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
+});
+
+test("honors a saved visible X feed before the first content render", async ({ context }) => {
+  const bootstrapPage = await openFixturePage(
+    context,
+    "https://www.youtube.com/",
+    youtubeHomeFixture
+  );
+  const iconSource = await bootstrapPage
+    .locator("#feed-destroyer-focus-card .feed-destroyer-focus-icon")
+    .getAttribute("src");
+
+  expect(iconSource).not.toBeNull();
+
+  const extensionUrl = new URL(iconSource!);
+  const extensionOrigin = `${extensionUrl.protocol}//${extensionUrl.host}`;
+  const popup = await context.newPage();
+  await popup.goto(`${extensionOrigin}/dist/popup.html`);
+  await popup
+    .getByRole("switch", { name: 'Hide X "For you" feed' })
+    .uncheck();
+
+  const page = await openFixturePage(
+    context,
+    "https://x.com/home",
+    xTimelineHydrationFixture()
+  );
+
+  await expect(page.getByTestId("timeline-post")).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-focus-app-hide-x-for-you",
+    "false"
+  );
+
+  const transitions = await page.evaluate(
+    () => Reflect.get(window, "xHideStateTransitions") as Array<string | null>
+  );
+  expect(transitions).not.toContain("true");
 });
 
 test("keeps the X feed switch available after showing the timeline", async ({ context }) => {

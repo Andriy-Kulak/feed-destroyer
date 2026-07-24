@@ -295,7 +295,6 @@ async function loadPreferences(): Promise<void> {
       ? storedFocusTarget
       : DEFAULT_FOCUS_TARGET;
   hideXForYou = values[CONTENT_HIDE_X_FOR_YOU_KEY] !== false;
-  scheduleRefresh();
 }
 
 function listenForPreferenceChanges(): void {
@@ -320,8 +319,12 @@ function listenForPreferenceChanges(): void {
   });
 }
 
-refreshState();
-void loadPreferences();
-listenForPreferenceChanges();
-listenForRouteChanges();
-startObserver();
+async function initialize(): Promise<void> {
+  await loadPreferences();
+  refreshState();
+  listenForPreferenceChanges();
+  listenForRouteChanges();
+  startObserver();
+}
+
+void initialize();
