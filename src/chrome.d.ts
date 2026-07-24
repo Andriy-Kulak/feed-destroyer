@@ -1,15 +1,25 @@
+type ChromeStorageValue = string | boolean;
+
 declare const chrome: {
   runtime: {
     getURL(path: string): string;
   };
   storage: {
     local: {
-      get(defaults: Record<string, string>): Promise<Record<string, string>>;
-      set(values: Record<string, string>): Promise<void>;
+      get(
+        defaults: Record<string, ChromeStorageValue>
+      ): Promise<Record<string, ChromeStorageValue>>;
+      set(values: Record<string, ChromeStorageValue>): Promise<void>;
     };
     onChanged: {
       addListener(
-        callback: (changes: Record<string, { oldValue?: string; newValue?: string }>, areaName: string) => void
+        callback: (
+          changes: Record<
+            string,
+            { oldValue?: ChromeStorageValue; newValue?: ChromeStorageValue }
+          >,
+          areaName: string
+        ) => void
       ): void;
     };
   };

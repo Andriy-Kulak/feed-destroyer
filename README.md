@@ -9,8 +9,8 @@ A tiny always-on Chrome extension that hides distracting surfaces on YouTube and
 ## What it does
 
 - YouTube: hides home/browse feeds, recommendations, Shorts navigation entry points, comments, live chat, end-screen cards, mixes, and merch/fundraiser-style panels while keeping direct video and Shorts watching, search, subscriptions, and channel Shorts tabs usable.
-- X: keeps the `For you` tab visible, but hides the Home timeline contents when `For you` is active. `Following` remains usable.
-- Popup: lets you set a local focus target, then shows that reminder where the blocked feed used to be.
+- X: hides the Home timeline contents when `For you` is active by default. `Following` remains usable.
+- Popup: lets you show or hide X's `For you` feed and set the local focus reminder shown where a blocked feed used to be.
 
 ### YouTube behavior
 
@@ -43,6 +43,10 @@ Run `npm run build` again after changing TypeScript or CSS, then reload the exte
 ## Use
 
 Click the Feed Destroyer toolbar icon to set what you are focusing on today.
+
+Use **Hide X "For you" feed** to change X at any time. Switching it off restores
+the feed immediately; switching it on hides the feed and restores the focus card.
+The setting is saved locally in Chrome.
 
 Example:
 
@@ -78,7 +82,7 @@ Current browser coverage includes:
 - Watch recommendations hidden while Gemini and Viewstats remain visible.
 - Direct Shorts and channel Shorts preserved while Shorts navigation stays hidden.
 - Search, subscriptions, and channel pages preserved.
-- X `For you` hidden and `Following` preserved.
+- X `For you` hidden by default, switchable from the popup, and `Following` preserved.
 
 Run one behavior while developing:
 

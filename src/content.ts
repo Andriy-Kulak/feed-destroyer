@@ -1,7 +1,9 @@
 const ROOT = document.documentElement;
 const FOCUS_CARD_ID = "feed-destroyer-focus-card";
 const CONTENT_FOCUS_TARGET_KEY = "focusTarget";
+const CONTENT_HIDE_X_FOR_YOU_KEY = "hideXForYou";
 const DEFAULT_FOCUS_TARGET = "10K MRR for my apps";
+const DEFAULT_HIDE_X_FOR_YOU = true;
 
 type Site = "youtube" | "x" | "other";
 type YouTubeView = "home" | "watch" | "shorts" | "search" | "subscriptions" | "channel" | "other";
@@ -9,6 +11,7 @@ type XFeed = "for-you" | "following" | "other";
 
 let pendingRefresh = false;
 let focusTarget = DEFAULT_FOCUS_TARGET;
+let hideXForYou = DEFAULT_HIDE_X_FOR_YOU;
 
 function getSite(): Site {
   const host = window.location.hostname.replace(/^www\./, "");
@@ -70,12 +73,15 @@ function refreshState(): void {
   if (site === "youtube") {
     ROOT.dataset.focusAppYoutubeView = getYouTubeView();
     delete ROOT.dataset.focusAppXFeed;
+    delete ROOT.dataset.focusAppHideXForYou;
   } else if (site === "x") {
     ROOT.dataset.focusAppXFeed = getXFeed();
+    ROOT.dataset.focusAppHideXForYou = String(hideXForYou);
     delete ROOT.dataset.focusAppYoutubeView;
   } else {
     delete ROOT.dataset.focusAppYoutubeView;
     delete ROOT.dataset.focusAppXFeed;
+    delete ROOT.dataset.focusAppHideXForYou;
   }
 
   renderFocusCard();
@@ -128,7 +134,7 @@ function shouldShowFocusCard(): boolean {
     return getYouTubeView() === "home";
   }
 
-  return getSite() === "x" && getXFeed() === "for-you";
+  return getSite() === "x" && getXFeed() === "for-you" && hideXForYou;
 }
 
 function getFocusCardMount(): Element | null {
@@ -222,26 +228,45 @@ function renderFocusCard(): void {
   }
 }
 
-async function loadFocusTarget(): Promise<void> {
+async function loadPreferences(): Promise<void> {
   const values = await chrome.storage.local.get({
-    [CONTENT_FOCUS_TARGET_KEY]: DEFAULT_FOCUS_TARGET
+    [CONTENT_FOCUS_TARGET_KEY]: DEFAULT_FOCUS_TARGET,
+    [CONTENT_HIDE_X_FOR_YOU_KEY]: DEFAULT_HIDE_X_FOR_YOU
   });
 
-  focusTarget = values[CONTENT_FOCUS_TARGET_KEY] || DEFAULT_FOCUS_TARGET;
+  const storedFocusTarget = values[CONTENT_FOCUS_TARGET_KEY];
+  focusTarget =
+    typeof storedFocusTarget === "string" && storedFocusTarget
+      ? storedFocusTarget
+      : DEFAULT_FOCUS_TARGET;
+  hideXForYou = values[CONTENT_HIDE_X_FOR_YOU_KEY] !== false;
   scheduleRefresh();
 }
 
-function listenForFocusTargetChanges(): void {
+function listenForPreferenceChanges(): void {
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== "local" || !changes[CONTENT_FOCUS_TARGET_KEY]) return;
+    if (areaName !== "local") return;
 
-    focusTarget = changes[CONTENT_FOCUS_TARGET_KEY].newValue || DEFAULT_FOCUS_TARGET;
-    scheduleRefresh();
+    if (changes[CONTENT_FOCUS_TARGET_KEY]) {
+      const nextFocusTarget = changes[CONTENT_FOCUS_TARGET_KEY].newValue;
+      focusTarget =
+        typeof nextFocusTarget === "string" && nextFocusTarget
+          ? nextFocusTarget
+          : DEFAULT_FOCUS_TARGET;
+    }
+
+    if (changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
+      hideXForYou = changes[CONTENT_HIDE_X_FOR_YOU_KEY].newValue !== false;
+    }
+
+    if (changes[CONTENT_FOCUS_TARGET_KEY] || changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
+      scheduleRefresh();
+    }
   });
 }
 
 refreshState();
-void loadFocusTarget();
-listenForFocusTargetChanges();
+void loadPreferences();
+listenForPreferenceChanges();
 listenForRouteChanges();
 startObserver();
