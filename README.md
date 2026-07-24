@@ -46,9 +46,9 @@ Click the Feed Destroyer toolbar icon to set what you are focusing on today.
 
 Use **Hide X "For you" feed** to change X at any time. Switching it off restores
 the feed immediately; switching it on hides the feed and restores the focus card.
-The same switch appears inside X's focus card for quickly restoring the feed. Once
-the card is gone, use the popup to turn hiding back on. The setting is saved locally
-in Chrome.
+The same switch appears inside X's focus card for quickly restoring the feed. When
+the feed is visible, the reminder collapses into a slim switch bar so the control
+never disappears. The setting is saved locally in Chrome.
 
 Example:
 

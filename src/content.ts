@@ -134,7 +134,7 @@ function shouldShowFocusCard(): boolean {
     return getYouTubeView() === "home";
   }
 
-  return getSite() === "x" && getXFeed() === "for-you" && hideXForYou;
+  return getSite() === "x" && getXFeed() === "for-you";
 }
 
 function getFocusCardMount(): Element | null {
@@ -226,8 +226,11 @@ function getOrCreateFocusCard(): HTMLElement {
     settingSwitch.setAttribute("role", "switch");
     settingSwitch.setAttribute("aria-label", 'Hide X "For you" feed');
     settingSwitch.addEventListener("change", () => {
+      hideXForYou = settingSwitch.checked;
+      scheduleRefresh();
+
       void chrome.storage.local.set({
-        [CONTENT_HIDE_X_FOR_YOU_KEY]: settingSwitch.checked
+        [CONTENT_HIDE_X_FOR_YOU_KEY]: hideXForYou
       });
     });
 
@@ -255,6 +258,24 @@ function renderFocusCard(): void {
   const target = card.querySelector<HTMLElement>(".feed-destroyer-focus-target");
   if (target) {
     target.textContent = focusTarget || DEFAULT_FOCUS_TARGET;
+  }
+
+  if (getSite() === "x") {
+    card.dataset.xFeedHidden = String(hideXForYou);
+
+    const settingSwitch = card.querySelector<HTMLInputElement>(
+      ".feed-destroyer-card-toggle"
+    );
+    if (settingSwitch) {
+      settingSwitch.checked = hideXForYou;
+    }
+
+    const settingHint = card.querySelector<HTMLElement>(
+      ".feed-destroyer-card-setting-hint"
+    );
+    if (settingHint) {
+      settingHint.textContent = hideXForYou ? "Turn off to browse" : "Turn on to hide";
+    }
   }
 
   if (card.parentElement !== mount) {

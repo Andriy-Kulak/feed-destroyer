@@ -192,7 +192,7 @@ test("replaces the X For you timeline with the focus card", async ({ context }) 
   await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
 });
 
-test("can show the X For you timeline from the focus card", async ({ context }) => {
+test("keeps the X feed switch available after showing the timeline", async ({ context }) => {
   const page = await openFixturePage(
     context,
     "https://x.com/home",
@@ -206,7 +206,12 @@ test("can show the X For you timeline from the focus card", async ({ context }) 
   await expect(hideForYouSwitch).toBeChecked();
   await hideForYouSwitch.uncheck();
   await expect(page.getByTestId("timeline-post")).toBeVisible();
-  await expect(focusCard).toHaveCount(0);
+  await expect(focusCard).toBeVisible();
+  await expect(hideForYouSwitch).not.toBeChecked();
+
+  await hideForYouSwitch.check();
+  await expect(page.getByTestId("timeline-post")).toBeHidden();
+  await expect(focusCard).toBeVisible();
 });
 
 test("can show and hide the X For you timeline from the popup", async ({ context }) => {
@@ -233,7 +238,12 @@ test("can show and hide the X For you timeline from the popup", async ({ context
   await expect(hideForYouSwitch).toBeChecked();
   await hideForYouSwitch.uncheck();
   await expect(page.getByTestId("timeline-post")).toBeVisible();
-  await expect(page.locator("#feed-destroyer-focus-card")).toHaveCount(0);
+  await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
+  await expect(
+    page
+      .locator("#feed-destroyer-focus-card")
+      .getByRole("switch", { name: 'Hide X "For you" feed' })
+  ).not.toBeChecked();
 
   await popup.reload();
   await expect(hideForYouSwitch).not.toBeChecked();

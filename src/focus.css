@@ -265,6 +265,24 @@ html[data-focus-app-site="x"] #feed-destroyer-focus-card .feed-destroyer-focus-f
   outline-offset: 2px !important;
 }
 
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] {
+  margin: 8px auto !important;
+  padding: 0 !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] .feed-destroyer-focus-header,
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] .feed-destroyer-focus-message,
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] .feed-destroyer-focus-footer {
+  display: none !important;
+}
+
+html[data-focus-app-site="x"] #feed-destroyer-focus-card[data-x-feed-hidden="false"] .feed-destroyer-card-setting {
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
 @media (max-width: 700px) {
   #feed-destroyer-focus-card {
     margin: 18px 14px !important;
