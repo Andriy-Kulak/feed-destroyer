@@ -11,6 +11,8 @@ A tiny always-on Chrome extension that hides distracting surfaces on YouTube and
 - YouTube: hides home/browse feeds, recommendations, Shorts navigation entry points, comments, live chat, end-screen cards, mixes, and merch/fundraiser-style panels while keeping direct video and Shorts watching, search, subscriptions, and channel Shorts tabs usable.
 - X: hides the Home timeline contents when `For you` is active by default. `Following` remains usable.
 - Popup: lets you show or hide X's `For you` feed and set the local focus reminder shown where a blocked feed used to be.
+- Activity: counts focused, active-tab time on X and YouTube in local daily totals. It pauses when the tab, Chrome window, or computer is inactive.
+- New tab: replaces Chrome's default page with the current focus target and today's X and YouTube totals.
 
 ### YouTube behavior
 
@@ -60,6 +62,15 @@ The extension stores this text locally in Chrome. When it destroys a feed, it re
 
 To update the reminder, open the toolbar popup, edit the input, and refresh YouTube or X if the page does not update immediately.
 
+Opening a new tab shows the same goal in a larger focus dashboard. You can edit it
+there or in the popup; Chrome local storage keeps every view in sync. The dashboard
+also shows active time for the current day.
+
+Activity tracking stores only aggregate milliseconds for X and YouTube, grouped by
+local calendar day. It keeps the most recent seven days and does not save URLs, page
+titles, posts, videos, or page content. A site counts only while its tab is visible,
+its Chrome window is focused, and the computer is not idle or locked.
+
 ## Checks
 
 ```bash
@@ -85,6 +96,7 @@ Current browser coverage includes:
 - Direct Shorts and channel Shorts preserved while Shorts navigation stays hidden.
 - Search, subscriptions, and channel pages preserved.
 - X `For you` hidden by default, switchable from the focus card or popup, and `Following` preserved.
+- Custom new-tab goal editing and daily activity display.
 
 Run one behavior while developing:
 

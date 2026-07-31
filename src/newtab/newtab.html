@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Today is for focus</title>
+    <link rel="stylesheet" href="newtab.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="#goal" aria-label="Feed Destroyer goal">
+          <img src="icons/icon-48.png" alt="" width="48" height="48">
+          <span>
+            <strong>Feed Destroyer</strong>
+            <small>New tab. Same mission.</small>
+          </span>
+        </a>
+        <p class="date" id="todayDate"></p>
+      </header>
+
+      <main class="dashboard">
+        <section class="goal-card" aria-labelledby="goalTitle">
+          <div class="goal-decoration" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <p class="eyebrow">Today’s target</p>
+          <h1 id="goalTitle">What are you moving today?</h1>
+          <label class="visually-hidden" for="goal">Today I am focusing on</label>
+          <textarea
+            id="goal"
+            class="goal-input"
+            rows="2"
+            maxlength="80"
+            spellcheck="true"
+            placeholder="10K MRR for my apps"
+          ></textarea>
+          <p class="goal-hint">Click the goal to edit it. It updates everywhere automatically.</p>
+          <div class="goal-footer">
+            <span class="bolt" aria-hidden="true">↗</span>
+            <strong>The feed can wait. Make the number move.</strong>
+          </div>
+        </section>
+
+        <aside class="activity-card" aria-labelledby="activityTitle">
+          <div class="activity-heading">
+            <div>
+              <p class="eyebrow">Distraction meter</p>
+              <h2 id="activityTitle">Active time today</h2>
+            </div>
+            <span class="live-pill"><i aria-hidden="true"></i> Local only</span>
+          </div>
+
+          <div class="activity-list">
+            <div class="activity-row activity-row-x">
+              <div class="site-mark" aria-hidden="true">X</div>
+              <div class="site-copy">
+                <strong>X</strong>
+                <span>Focused tab time</span>
+              </div>
+              <output id="xTime" aria-label="X active time today">0m</output>
+            </div>
+
+            <div class="activity-row activity-row-youtube">
+              <div class="site-mark" aria-hidden="true">
+                <span class="play"></span>
+              </div>
+              <div class="site-copy">
+                <strong>YouTube</strong>
+                <span>Focused tab time</span>
+              </div>
+              <output id="youtubeTime" aria-label="YouTube active time today">0m</output>
+            </div>
+          </div>
+
+          <p class="privacy-note">
+            Counts only while the site is visible and Chrome is active. No URLs, videos,
+            posts, or browsing history are saved.
+          </p>
+        </aside>
+      </main>
+
+      <footer class="page-footer">
+        <span>Open with intention.</span>
+        <span aria-hidden="true">•</span>
+        <span>Your address bar still searches normally.</span>
+      </footer>
+    </div>
+    <script type="module" src="newtab/newtab.js"></script>
+  </body>
+</html>

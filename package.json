@@ -6,7 +6,7 @@
   "description": "A tiny always-on Chrome extension for hiding distracting YouTube and X surfaces.",
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "tsc && cp dist/popup/popup.js dist/popup.js && cp src/focus.css dist/focus.css && cp src/popup/popup.html dist/popup.html && cp src/popup/popup.css dist/popup.css && mkdir -p dist/icons && cp src/icons/icon-[0-9]*.png dist/icons/",
+    "build": "tsc && cp dist/popup/popup.js dist/popup.js && cp src/focus.css dist/focus.css && cp src/popup/popup.html dist/popup.html && cp src/popup/popup.css dist/popup.css && cp src/newtab/newtab.html dist/newtab.html && cp src/newtab/newtab.css dist/newtab.css && mkdir -p dist/icons && cp src/icons/icon-[0-9]*.png dist/icons/",
     "typecheck": "tsc --noEmit && tsc --project tsconfig.tests.json",
     "test:rules": "node --test tests/*.test.mjs",
     "test:e2e": "npm run build && playwright test",

@@ -322,3 +322,87 @@ test("keeps the X Following timeline usable", async ({ context }) => {
   await expect(page.getByTestId("timeline-post")).toBeVisible();
   await expect(page.locator("#feed-destroyer-focus-card")).toHaveCount(0);
 });
+
+test("records focused YouTube time as a local daily aggregate", async ({ context }) => {
+  const trackedPage = await openFixturePage(
+    context,
+    "https://www.youtube.com/",
+    youtubeHomeFixture
+  );
+
+  await trackedPage.bringToFront();
+  await trackedPage.waitForTimeout(300);
+  await trackedPage.evaluate(() => window.dispatchEvent(new Event("blur")));
+
+  const dashboard = await context.newPage();
+  await dashboard.goto("chrome://newtab/");
+
+  const storedActivity = async () =>
+    dashboard.evaluate(async () => {
+      const extensionChrome = Reflect.get(globalThis, "chrome") as {
+        storage: {
+          local: {
+            get(defaults: Record<string, unknown>): Promise<Record<string, unknown>>;
+          };
+        };
+      };
+      const values = await extensionChrome.storage.local.get({ activityByDay: {} });
+      const days = Object.values(
+        values.activityByDay as Record<string, { x: number; youtube: number }>
+      );
+      return days.at(-1) ?? { x: 0, youtube: 0 };
+    });
+
+  await expect.poll(async () => (await storedActivity()).youtube).toBeGreaterThan(0);
+  expect((await storedActivity()).x).toBe(0);
+});
+
+test("replaces Chrome new tab with the editable goal and local activity totals", async ({
+  context
+}) => {
+  const focusPage = await openFixturePage(
+    context,
+    "https://www.youtube.com/",
+    youtubeHomeFixture
+  );
+  const page = await context.newPage();
+  await page.goto("chrome://newtab/");
+
+  expect(page.url()).toMatch(/^chrome-extension:\/\//);
+  await expect(page.getByRole("heading", { name: "What are you moving today?" })).toBeVisible();
+
+  const day = await page.evaluate(() => {
+    const date = new Date();
+    const year = String(date.getFullYear());
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const dateOfMonth = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${dateOfMonth}`;
+  });
+
+  await page.evaluate(async ({ today }) => {
+    const extensionChrome = Reflect.get(globalThis, "chrome") as {
+      storage: {
+        local: {
+          set(values: Record<string, unknown>): Promise<void>;
+        };
+      };
+    };
+
+    await extensionChrome.storage.local.set({
+      activityByDay: {
+        [today]: {
+          x: 90 * 60_000,
+          youtube: 10 * 60_000
+        }
+      }
+    });
+  }, { today: day });
+
+  await expect(page.getByLabel("X active time today")).toHaveText("1h 30m");
+  await expect(page.getByLabel("YouTube active time today")).toHaveText("10m");
+
+  await page.locator("#goal").fill("Ship the activity MVP");
+  await expect(
+    focusPage.locator("#feed-destroyer-focus-card .feed-destroyer-focus-target")
+  ).toHaveText("Ship the activity MVP");
+});

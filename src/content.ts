@@ -4,6 +4,7 @@ const CONTENT_FOCUS_TARGET_KEY = "focusTarget";
 const CONTENT_HIDE_X_FOR_YOU_KEY = "hideXForYou";
 const DEFAULT_FOCUS_TARGET = "10K MRR for my apps";
 const DEFAULT_HIDE_X_FOR_YOU = true;
+const ACTIVITY_PULSE_INTERVAL_MS = 15_000;
 
 type Site = "youtube" | "x" | "other";
 type YouTubeView = "home" | "watch" | "shorts" | "search" | "subscriptions" | "channel" | "other";
@@ -25,6 +26,32 @@ function getSite(): Site {
   }
 
   return "other";
+}
+
+function reportActivity(forceInactive = false): void {
+  const site = getSite();
+  if (site === "other") return;
+
+  const active =
+    !forceInactive && document.visibilityState === "visible" && document.hasFocus();
+
+  void chrome.runtime
+    .sendMessage({
+      type: "feed-destroyer:activity-pulse",
+      site,
+      active,
+      occurredAt: Date.now()
+    })
+    .catch(() => undefined);
+}
+
+function startActivityTracking(): void {
+  document.addEventListener("visibilitychange", () => reportActivity());
+  window.addEventListener("focus", () => reportActivity());
+  window.addEventListener("blur", () => reportActivity(true));
+  window.addEventListener("pagehide", () => reportActivity(true));
+  window.setInterval(() => reportActivity(), ACTIVITY_PULSE_INTERVAL_MS);
+  reportActivity();
 }
 
 function getYouTubeView(): YouTubeView {
@@ -320,6 +347,7 @@ function listenForPreferenceChanges(): void {
 }
 
 async function initialize(): Promise<void> {
+  startActivityTracking();
   await loadPreferences();
   refreshState();
   listenForPreferenceChanges();

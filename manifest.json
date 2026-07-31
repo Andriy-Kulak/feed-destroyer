@@ -3,7 +3,14 @@
   "name": "Feed Destroyer",
   "version": "0.1.0",
   "description": "Hide distracting YouTube and X surfaces while keeping useful pages usable.",
-  "permissions": ["storage"],
+  "permissions": ["idle", "storage"],
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "chrome_url_overrides": {
+    "newtab": "dist/newtab.html"
+  },
   "action": {
     "default_title": "Feed Destroyer",
     "default_popup": "dist/popup.html"
