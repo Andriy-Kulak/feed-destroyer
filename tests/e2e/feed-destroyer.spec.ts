@@ -1,4 +1,32 @@
+import type { BrowserContext } from "@playwright/test";
 import { expect, openFixturePage, test } from "./fixtures";
+
+type StubbedStorage = {
+  storage: {
+    local: {
+      get(defaults: Record<string, unknown>): Promise<Record<string, unknown>>;
+      set(values: Record<string, unknown>): Promise<void>;
+    };
+  };
+};
+
+async function getExtensionOrigin(context: BrowserContext): Promise<string> {
+  const bootstrapPage = await openFixturePage(
+    context,
+    "https://www.youtube.com/",
+    youtubeHomeFixture
+  );
+  const iconSource = await bootstrapPage
+    .locator("#feed-destroyer-focus-card .feed-destroyer-focus-icon")
+    .getAttribute("src");
+
+  expect(iconSource).not.toBeNull();
+
+  const extensionUrl = new URL(iconSource!);
+  await bootstrapPage.close();
+
+  return `${extensionUrl.protocol}//${extensionUrl.host}`;
+}
 
 const youtubeHomeFixture = `<!doctype html>
 <html>
@@ -309,6 +337,50 @@ test("can show and hide the X For you timeline from the popup", async ({ context
   await hideForYouSwitch.check();
   await expect(page.getByTestId("timeline-post")).toBeHidden();
   await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
+});
+
+test("falls back to defaults and says so when preferences cannot be read", async ({
+  context
+}) => {
+  const extensionOrigin = await getExtensionOrigin(context);
+  const popup = await context.newPage();
+
+  await popup.addInitScript(() => {
+    const chromeApi = Reflect.get(globalThis, "chrome") as StubbedStorage;
+
+    chromeApi.storage.local.get = () => Promise.reject(new Error("storage unavailable"));
+  });
+  await popup.goto(`${extensionOrigin}/dist/popup.html`);
+
+  await expect(popup.locator("#preferenceStatus")).toContainText("Showing defaults");
+  await expect(popup.locator("#focusTarget")).toHaveValue("10K MRR for my apps");
+  await expect(popup.getByRole("switch", { name: 'Hide X "For you" feed' })).toBeChecked();
+});
+
+test("reports a failed popup save instead of silently dropping it", async ({ context }) => {
+  const extensionOrigin = await getExtensionOrigin(context);
+  const popup = await context.newPage();
+
+  await popup.addInitScript(() => {
+    const chromeApi = Reflect.get(globalThis, "chrome") as StubbedStorage;
+
+    chromeApi.storage.local.set = () => Promise.reject(new Error("storage unavailable"));
+  });
+  await popup.goto(`${extensionOrigin}/dist/popup.html`);
+
+  const hideForYouSwitch = popup.getByRole("switch", { name: 'Hide X "For you" feed' });
+
+  await expect(hideForYouSwitch).toBeChecked();
+  await hideForYouSwitch.click();
+
+  await expect(popup.locator("#preferenceStatus")).toContainText("Could not save");
+  await expect(hideForYouSwitch).toBeChecked();
+
+  await popup.locator("#focusTarget").fill("ship the fix");
+
+  await expect(popup.locator("#preferenceStatus")).toContainText(
+    "Could not save your focus target."
+  );
 });
 
 test("keeps the X Following timeline usable", async ({ context }) => {

@@ -54,6 +54,22 @@ h1 {
   line-height: 1.45;
 }
 
+.status-message {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  color: #7a1c0c;
+  background: #ffe6e0;
+  border: 2px solid #ff4d2d;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.status-message[hidden] {
+  display: none;
+}
+
 .setting {
   display: flex;
   gap: 16px;

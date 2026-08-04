@@ -21,6 +21,14 @@ test("CI can upload Playwright failure artifacts", () => {
   );
 });
 
+test("popup can announce preference failures", () => {
+  assert.match(
+    popupHtml,
+    /<p(?=[^>]*\bid="preferenceStatus")(?=[^>]*\brole="status")(?=[^>]*\bhidden\b)[^>]*>/s,
+    "the popup needs a hidden live region so storage failures reach the user"
+  );
+});
+
 test("popup renders the default X hiding state before preferences hydrate", () => {
   assert.match(
     popupHtml,

@@ -12,6 +12,19 @@ type XFeed = "for-you" | "following" | "other";
 let pendingRefresh = false;
 let focusTarget = DEFAULT_FOCUS_TARGET;
 let hideXForYou = DEFAULT_HIDE_X_FOR_YOU;
+let hideXForYouSaveFailed = false;
+
+function reportError(context: string, error: unknown): void {
+  console.error(`[feed-destroyer] ${context}`, error);
+}
+
+function runGuarded(context: string, task: () => void): void {
+  try {
+    task();
+  } catch (error) {
+    reportError(context, error);
+  }
+}
 
 function getSite(): Site {
   const host = window.location.hostname.replace(/^www\./, "");
@@ -93,7 +106,7 @@ function scheduleRefresh(): void {
   pendingRefresh = true;
   window.requestAnimationFrame(() => {
     pendingRefresh = false;
-    refreshState();
+    runGuarded("could not refresh the page state", refreshState);
   });
 }
 
@@ -112,8 +125,8 @@ function listenForRouteChanges(): void {
     };
   };
 
-  wrapHistoryMethod("pushState");
-  wrapHistoryMethod("replaceState");
+  runGuarded("could not observe history.pushState", () => wrapHistoryMethod("pushState"));
+  runGuarded("could not observe history.replaceState", () => wrapHistoryMethod("replaceState"));
   window.addEventListener("popstate", notify);
   window.addEventListener("yt-navigate-finish", notify);
 }
@@ -168,12 +181,17 @@ function getOrCreateFocusCard(): HTMLElement {
   const header = document.createElement("div");
   header.className = "feed-destroyer-focus-header";
 
-  const icon = document.createElement("img");
-  icon.className = "feed-destroyer-focus-icon";
-  icon.src = chrome.runtime.getURL("dist/icons/icon-48.png");
-  icon.alt = "";
-  icon.width = 48;
-  icon.height = 48;
+  const iconUrl = getIconUrl();
+  let icon: HTMLImageElement | null = null;
+
+  if (iconUrl) {
+    icon = document.createElement("img");
+    icon.className = "feed-destroyer-focus-icon";
+    icon.src = iconUrl;
+    icon.alt = "";
+    icon.width = 48;
+    icon.height = 48;
+  }
 
   const copy = document.createElement("div");
   copy.className = "feed-destroyer-focus-copy";
@@ -201,7 +219,12 @@ function getOrCreateFocusCard(): HTMLElement {
   message.append(".");
 
   copy.append(eyebrow, title);
-  header.append(icon, copy);
+
+  if (icon) {
+    header.append(icon);
+  }
+
+  header.append(copy);
   card.append(header, message);
 
   if (getSite() === "x") {
@@ -226,12 +249,13 @@ function getOrCreateFocusCard(): HTMLElement {
     settingSwitch.setAttribute("role", "switch");
     settingSwitch.setAttribute("aria-label", 'Hide X "For you" feed');
     settingSwitch.addEventListener("change", () => {
+      const previousHideXForYou = hideXForYou;
+
       hideXForYou = settingSwitch.checked;
+      hideXForYouSaveFailed = false;
       scheduleRefresh();
 
-      void chrome.storage.local.set({
-        [CONTENT_HIDE_X_FOR_YOU_KEY]: hideXForYou
-      });
+      void persistHideXForYou(hideXForYou, previousHideXForYou);
     });
 
     settingCopy.append(settingLabel, settingHint);
@@ -241,6 +265,32 @@ function getOrCreateFocusCard(): HTMLElement {
 
   card.append(footer);
   return card;
+}
+
+function getIconUrl(): string | null {
+  try {
+    return chrome.runtime.getURL("dist/icons/icon-48.png");
+  } catch (error) {
+    reportError("could not resolve the focus card icon URL", error);
+    return null;
+  }
+}
+
+async function persistHideXForYou(next: boolean, previous: boolean): Promise<void> {
+  try {
+    await chrome.storage.local.set({ [CONTENT_HIDE_X_FOR_YOU_KEY]: next });
+  } catch (error) {
+    reportError("could not save the X feed preference", error);
+    hideXForYou = previous;
+    hideXForYouSaveFailed = true;
+    scheduleRefresh();
+  }
+}
+
+function getSettingHintText(): string {
+  if (hideXForYouSaveFailed) return "Could not save. Try again.";
+
+  return hideXForYou ? "Turn off to browse" : "Turn on to hide";
 }
 
 function renderFocusCard(): void {
@@ -274,7 +324,7 @@ function renderFocusCard(): void {
       ".feed-destroyer-card-setting-hint"
     );
     if (settingHint) {
-      settingHint.textContent = hideXForYou ? "Turn off to browse" : "Turn on to hide";
+      settingHint.textContent = getSettingHintText();
     }
   }
 
@@ -299,32 +349,51 @@ async function loadPreferences(): Promise<void> {
 
 function listenForPreferenceChanges(): void {
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== "local") return;
-
-    if (changes[CONTENT_FOCUS_TARGET_KEY]) {
-      const nextFocusTarget = changes[CONTENT_FOCUS_TARGET_KEY].newValue;
-      focusTarget =
-        typeof nextFocusTarget === "string" && nextFocusTarget
-          ? nextFocusTarget
-          : DEFAULT_FOCUS_TARGET;
-    }
-
-    if (changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
-      hideXForYou = changes[CONTENT_HIDE_X_FOR_YOU_KEY].newValue !== false;
-    }
-
-    if (changes[CONTENT_FOCUS_TARGET_KEY] || changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
-      scheduleRefresh();
-    }
+    runGuarded("could not apply a preference change", () => {
+      applyPreferenceChanges(changes, areaName);
+    });
   });
 }
 
-async function initialize(): Promise<void> {
-  await loadPreferences();
-  refreshState();
-  listenForPreferenceChanges();
-  listenForRouteChanges();
-  startObserver();
+function applyPreferenceChanges(
+  changes: Record<string, { oldValue?: ChromeStorageValue; newValue?: ChromeStorageValue }>,
+  areaName: string
+): void {
+  if (areaName !== "local") return;
+
+  if (changes[CONTENT_FOCUS_TARGET_KEY]) {
+    const nextFocusTarget = changes[CONTENT_FOCUS_TARGET_KEY].newValue;
+    focusTarget =
+      typeof nextFocusTarget === "string" && nextFocusTarget
+        ? nextFocusTarget
+        : DEFAULT_FOCUS_TARGET;
+  }
+
+  if (changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
+    hideXForYou = changes[CONTENT_HIDE_X_FOR_YOU_KEY].newValue !== false;
+    hideXForYouSaveFailed = false;
+  }
+
+  if (changes[CONTENT_FOCUS_TARGET_KEY] || changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
+    scheduleRefresh();
+  }
 }
 
-void initialize();
+async function initialize(): Promise<void> {
+  try {
+    await loadPreferences();
+  } catch (error) {
+    reportError("could not load saved preferences, falling back to defaults", error);
+    focusTarget = DEFAULT_FOCUS_TARGET;
+    hideXForYou = DEFAULT_HIDE_X_FOR_YOU;
+  }
+
+  runGuarded("could not apply the initial page state", refreshState);
+  runGuarded("could not listen for preference changes", listenForPreferenceChanges);
+  runGuarded("could not listen for route changes", listenForRouteChanges);
+  runGuarded("could not start the DOM observer", startObserver);
+}
+
+initialize().catch((error: unknown) => {
+  reportError("initialization failed", error);
+});
