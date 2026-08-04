@@ -39,7 +39,7 @@
         "https://twitter.com/*",
         "https://www.twitter.com/*"
       ],
-      "js": ["dist/content.js"],
+      "js": ["dist/preferences.js", "dist/dom.js", "dist/content.js"],
       "css": ["dist/focus.css"],
       "run_at": "document_start"
     }

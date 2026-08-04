@@ -1,10 +1,14 @@
-import { expect, openFixturePage, test } from "./fixtures";
+import {
+  expect,
+  focusCard,
+  hideXForYouSwitch,
+  htmlFixture,
+  openExtensionPopup,
+  openFixturePage,
+  test
+} from "./fixtures";
 
-const youtubeHomeFixture = `<!doctype html>
-<html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    <ytd-app>
+const youtubeHomeFixture = htmlFixture(`    <ytd-app>
       <ytd-browse page-subtype="home">
         <div id="primary">
           <ytd-rich-grid-renderer data-testid="home-feed">
@@ -12,15 +16,9 @@ const youtubeHomeFixture = `<!doctype html>
           </ytd-rich-grid-renderer>
         </div>
       </ytd-browse>
-    </ytd-app>
-  </body>
-</html>`;
+    </ytd-app>`);
 
-const youtubeWatchFixture = `<!doctype html>
-<html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    <ytd-app>
+const youtubeWatchFixture = htmlFixture(`    <ytd-app>
       <ytd-watch-flexy>
         <div id="columns">
           <div id="secondary">
@@ -45,29 +43,17 @@ const youtubeWatchFixture = `<!doctype html>
           </div>
         </div>
       </ytd-watch-flexy>
-    </ytd-app>
-  </body>
-</html>`;
+    </ytd-app>`);
 
-const youtubeShortFixture = `<!doctype html>
-<html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    <ytd-app>
+const youtubeShortFixture = htmlFixture(`    <ytd-app>
       <ytd-shorts data-testid="shorts-player">
         <ytd-reel-video-renderer>
           Direct Short
         </ytd-reel-video-renderer>
       </ytd-shorts>
-    </ytd-app>
-  </body>
-</html>`;
+    </ytd-app>`);
 
-const youtubeChannelShortsFixture = `<!doctype html>
-<html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    <ytd-app>
+const youtubeChannelShortsFixture = htmlFixture(`    <ytd-app>
       <ytd-guide-entry-renderer data-testid="shorts-nav">
         <a href="/shorts">Shorts</a>
       </ytd-guide-entry-renderer>
@@ -78,28 +64,16 @@ const youtubeChannelShortsFixture = `<!doctype html>
           </ytd-rich-item-renderer>
         </ytd-rich-grid-renderer>
       </ytd-browse>
-    </ytd-app>
-  </body>
-</html>`;
+    </ytd-app>`);
 
-const youtubeUsefulPageFixture = `<!doctype html>
-<html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    <ytd-app>
+const youtubeUsefulPageFixture = htmlFixture(`    <ytd-app>
       <main data-testid="useful-content">Useful YouTube content</main>
-    </ytd-app>
-  </body>
-</html>`;
+    </ytd-app>`);
 
 function xTimelineFixture(selectedTab: "For you" | "Following"): string {
   const forYouSelected = selectedTab === "For you";
 
-  return `<!doctype html>
-<html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    <div role="tab" aria-selected="${forYouSelected}">For you</div>
+  return htmlFixture(`    <div role="tab" aria-selected="${forYouSelected}">For you</div>
     <div role="tab" aria-selected="${!forYouSelected}">Following</div>
     <main>
       <div aria-label="Home timeline">
@@ -107,9 +81,7 @@ function xTimelineFixture(selectedTab: "For you" | "Following"): string {
           <article data-testid="timeline-post">Distracting post</article>
         </div>
       </div>
-    </main>
-  </body>
-</html>`;
+    </main>`);
 }
 
 function xTimelineHydrationFixture(): string {
@@ -137,7 +109,7 @@ test("replaces the YouTube home feed with the focus card", async ({ context }) =
 
   await expect(page.locator("html")).toHaveAttribute("data-focus-app-youtube-view", "home");
   await expect(page.getByTestId("home-feed")).toBeHidden();
-  await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
+  await expect(focusCard(page)).toBeVisible();
 });
 
 test("hides watch recommendations without hiding Gemini or Viewstats", async ({ context }) => {
@@ -163,7 +135,7 @@ test("allows intentional direct Shorts playback", async ({ context }) => {
 
   await expect(page.locator("html")).toHaveAttribute("data-focus-app-youtube-view", "shorts");
   await expect(page.getByTestId("shorts-player")).toBeVisible();
-  await expect(page.locator("#feed-destroyer-focus-card")).toHaveCount(0);
+  await expect(focusCard(page)).toHaveCount(0);
 });
 
 test("allows channel Shorts while hiding the Shorts navigation entry", async ({ context }) => {
@@ -176,7 +148,7 @@ test("allows channel Shorts while hiding the Shorts navigation entry", async ({ 
   await expect(page.locator("html")).toHaveAttribute("data-focus-app-youtube-view", "channel");
   await expect(page.getByTestId("channel-shorts-grid")).toBeVisible();
   await expect(page.getByTestId("shorts-nav")).toBeHidden();
-  await expect(page.locator("#feed-destroyer-focus-card")).toHaveCount(0);
+  await expect(focusCard(page)).toHaveCount(0);
 });
 
 test("keeps search, subscriptions, and channel pages usable", async ({ context }) => {
@@ -194,7 +166,7 @@ test("keeps search, subscriptions, and channel pages usable", async ({ context }
       expectedView
     );
     await expect(page.getByTestId("useful-content")).toBeVisible();
-    await expect(page.locator("#feed-destroyer-focus-card")).toHaveCount(0);
+    await expect(focusCard(page)).toHaveCount(0);
 
     await page.close();
   }
@@ -209,7 +181,7 @@ test("replaces the X For you timeline with the focus card", async ({ context }) 
 
   await expect(page.locator("html")).toHaveAttribute("data-focus-app-x-feed", "for-you");
   await expect(page.getByTestId("timeline-post")).toBeHidden();
-  await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
+  await expect(focusCard(page)).toBeVisible();
 });
 
 test("honors a saved visible X feed before the first content render", async ({ context }) => {
@@ -218,19 +190,8 @@ test("honors a saved visible X feed before the first content render", async ({ c
     "https://www.youtube.com/",
     youtubeHomeFixture
   );
-  const iconSource = await bootstrapPage
-    .locator("#feed-destroyer-focus-card .feed-destroyer-focus-icon")
-    .getAttribute("src");
-
-  expect(iconSource).not.toBeNull();
-
-  const extensionUrl = new URL(iconSource!);
-  const extensionOrigin = `${extensionUrl.protocol}//${extensionUrl.host}`;
-  const popup = await context.newPage();
-  await popup.goto(`${extensionOrigin}/dist/popup.html`);
-  await popup
-    .getByRole("switch", { name: 'Hide X "For you" feed' })
-    .uncheck();
+  const popup = await openExtensionPopup(context, bootstrapPage);
+  await hideXForYouSwitch(popup).uncheck();
 
   const page = await openFixturePage(
     context,
@@ -256,20 +217,18 @@ test("keeps the X feed switch available after showing the timeline", async ({ co
     "https://x.com/home",
     xTimelineFixture("For you")
   );
-  const focusCard = page.locator("#feed-destroyer-focus-card");
-  const hideForYouSwitch = focusCard.getByRole("switch", {
-    name: 'Hide X "For you" feed'
-  });
+  const card = focusCard(page);
+  const cardSwitch = hideXForYouSwitch(card);
 
-  await expect(hideForYouSwitch).toBeChecked();
-  await hideForYouSwitch.uncheck();
+  await expect(cardSwitch).toBeChecked();
+  await cardSwitch.uncheck();
   await expect(page.getByTestId("timeline-post")).toBeVisible();
-  await expect(focusCard).toBeVisible();
-  await expect(hideForYouSwitch).not.toBeChecked();
+  await expect(card).toBeVisible();
+  await expect(cardSwitch).not.toBeChecked();
 
-  await hideForYouSwitch.check();
+  await cardSwitch.check();
   await expect(page.getByTestId("timeline-post")).toBeHidden();
-  await expect(focusCard).toBeVisible();
+  await expect(card).toBeVisible();
 });
 
 test("can show and hide the X For you timeline from the popup", async ({ context }) => {
@@ -278,37 +237,21 @@ test("can show and hide the X For you timeline from the popup", async ({ context
     "https://x.com/home",
     xTimelineFixture("For you")
   );
-  const iconSource = await page
-    .locator("#feed-destroyer-focus-card .feed-destroyer-focus-icon")
-    .getAttribute("src");
+  const popup = await openExtensionPopup(context, page);
+  const popupSwitch = hideXForYouSwitch(popup);
 
-  expect(iconSource).not.toBeNull();
-
-  const extensionUrl = new URL(iconSource!);
-  const extensionOrigin = `${extensionUrl.protocol}//${extensionUrl.host}`;
-  const popup = await context.newPage();
-  await popup.goto(`${extensionOrigin}/dist/popup.html`);
-
-  const hideForYouSwitch = popup.getByRole("switch", {
-    name: 'Hide X "For you" feed'
-  });
-
-  await expect(hideForYouSwitch).toBeChecked();
-  await hideForYouSwitch.uncheck();
+  await expect(popupSwitch).toBeChecked();
+  await popupSwitch.uncheck();
   await expect(page.getByTestId("timeline-post")).toBeVisible();
-  await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
-  await expect(
-    page
-      .locator("#feed-destroyer-focus-card")
-      .getByRole("switch", { name: 'Hide X "For you" feed' })
-  ).not.toBeChecked();
+  await expect(focusCard(page)).toBeVisible();
+  await expect(hideXForYouSwitch(focusCard(page))).not.toBeChecked();
 
   await popup.reload();
-  await expect(hideForYouSwitch).not.toBeChecked();
+  await expect(popupSwitch).not.toBeChecked();
 
-  await hideForYouSwitch.check();
+  await popupSwitch.check();
   await expect(page.getByTestId("timeline-post")).toBeHidden();
-  await expect(page.locator("#feed-destroyer-focus-card")).toBeVisible();
+  await expect(focusCard(page)).toBeVisible();
 });
 
 test("keeps the X Following timeline usable", async ({ context }) => {
@@ -320,5 +263,5 @@ test("keeps the X Following timeline usable", async ({ context }) => {
 
   await expect(page.locator("html")).toHaveAttribute("data-focus-app-x-feed", "following");
   await expect(page.getByTestId("timeline-post")).toBeVisible();
-  await expect(page.locator("#feed-destroyer-focus-card")).toHaveCount(0);
+  await expect(focusCard(page)).toHaveCount(0);
 });

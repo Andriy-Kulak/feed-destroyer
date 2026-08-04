@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { readProjectFile } from "./read-project-file.mjs";
 
-const focusCss = await readFile(new URL("../src/focus.css", import.meta.url), "utf8");
-const contentScript = await readFile(new URL("../src/content.ts", import.meta.url), "utf8");
+const focusCss = await readProjectFile("src/focus.css");
+const contentScript = await readProjectFile("src/content.ts");
 
 function getHiddenSelectors(css) {
   const selectors = [];

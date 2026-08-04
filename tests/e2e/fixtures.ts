@@ -1,12 +1,17 @@
 import {
   chromium,
+  expect,
   test as base,
   type BrowserContext,
+  type Locator,
   type Page
 } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 
 const extensionPath = fileURLToPath(new URL("../..", import.meta.url));
+
+export const HIDE_X_FOR_YOU_SWITCH_NAME = 'Hide X "For you" feed';
+export const FOCUS_CARD_SELECTOR = "#feed-destroyer-focus-card";
 
 export const test = base.extend<{ context: BrowserContext }>({
   context: async ({}, use, testInfo) => {
@@ -75,6 +80,40 @@ export async function openFixturePage(
   const page = await context.newPage();
   await page.goto(url);
   return page;
+}
+
+export function htmlFixture(bodyMarkup: string): string {
+  return `<!doctype html>
+<html>
+  <head><meta charset="utf-8"></head>
+  <body>
+${bodyMarkup}
+  </body>
+</html>`;
+}
+
+export function focusCard(page: Page): Locator {
+  return page.locator(FOCUS_CARD_SELECTOR);
+}
+
+export function hideXForYouSwitch(scope: Locator | Page): Locator {
+  return scope.getByRole("switch", { name: HIDE_X_FOR_YOU_SWITCH_NAME });
+}
+
+export async function openExtensionPopup(
+  context: BrowserContext,
+  pageWithFocusCard: Page
+): Promise<Page> {
+  const iconSource = await focusCard(pageWithFocusCard)
+    .locator(".feed-destroyer-focus-icon")
+    .getAttribute("src");
+
+  expect(iconSource).not.toBeNull();
+
+  const extensionUrl = new URL(iconSource!);
+  const popup = await context.newPage();
+  await popup.goto(`${extensionUrl.protocol}//${extensionUrl.host}/dist/popup.html`);
+  return popup;
 }
 
 export { expect } from "@playwright/test";
