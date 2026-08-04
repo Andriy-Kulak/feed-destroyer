@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "description": "Hide distracting YouTube and X surfaces while keeping useful pages usable.",
   "permissions": ["storage"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'"
+  },
   "action": {
     "default_title": "Feed Destroyer",
     "default_popup": "dist/popup.html"

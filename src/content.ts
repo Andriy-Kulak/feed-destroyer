@@ -4,6 +4,7 @@ const CONTENT_FOCUS_TARGET_KEY = "focusTarget";
 const CONTENT_HIDE_X_FOR_YOU_KEY = "hideXForYou";
 const DEFAULT_FOCUS_TARGET = "10K MRR for my apps";
 const DEFAULT_HIDE_X_FOR_YOU = true;
+const MAX_FOCUS_TARGET_LENGTH = 80;
 
 type Site = "youtube" | "x" | "other";
 type YouTubeView = "home" | "watch" | "shorts" | "search" | "subscriptions" | "channel" | "other";
@@ -12,6 +13,18 @@ type XFeed = "for-you" | "following" | "other";
 let pendingRefresh = false;
 let focusTarget = DEFAULT_FOCUS_TARGET;
 let hideXForYou = DEFAULT_HIDE_X_FOR_YOU;
+
+function sanitizeFocusTarget(value: unknown): string {
+  if (typeof value !== "string") return DEFAULT_FOCUS_TARGET;
+
+  const cleaned = value
+    .replace(/[\p{Cc}\p{Cf}]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_FOCUS_TARGET_LENGTH);
+
+  return cleaned || DEFAULT_FOCUS_TARGET;
+}
 
 function getSite(): Site {
   const host = window.location.hostname.replace(/^www\./, "");
@@ -257,7 +270,7 @@ function renderFocusCard(): void {
   const card = getOrCreateFocusCard();
   const target = card.querySelector<HTMLElement>(".feed-destroyer-focus-target");
   if (target) {
-    target.textContent = focusTarget || DEFAULT_FOCUS_TARGET;
+    target.textContent = focusTarget;
   }
 
   if (getSite() === "x") {
@@ -289,11 +302,7 @@ async function loadPreferences(): Promise<void> {
     [CONTENT_HIDE_X_FOR_YOU_KEY]: DEFAULT_HIDE_X_FOR_YOU
   });
 
-  const storedFocusTarget = values[CONTENT_FOCUS_TARGET_KEY];
-  focusTarget =
-    typeof storedFocusTarget === "string" && storedFocusTarget
-      ? storedFocusTarget
-      : DEFAULT_FOCUS_TARGET;
+  focusTarget = sanitizeFocusTarget(values[CONTENT_FOCUS_TARGET_KEY]);
   hideXForYou = values[CONTENT_HIDE_X_FOR_YOU_KEY] !== false;
 }
 
@@ -302,11 +311,7 @@ function listenForPreferenceChanges(): void {
     if (areaName !== "local") return;
 
     if (changes[CONTENT_FOCUS_TARGET_KEY]) {
-      const nextFocusTarget = changes[CONTENT_FOCUS_TARGET_KEY].newValue;
-      focusTarget =
-        typeof nextFocusTarget === "string" && nextFocusTarget
-          ? nextFocusTarget
-          : DEFAULT_FOCUS_TARGET;
+      focusTarget = sanitizeFocusTarget(changes[CONTENT_FOCUS_TARGET_KEY].newValue);
     }
 
     if (changes[CONTENT_HIDE_X_FOR_YOU_KEY]) {
